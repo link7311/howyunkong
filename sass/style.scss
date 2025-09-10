@@ -1,0 +1,60 @@
+@use "basic";
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+.basic-hover{
+	cursor: pointer;
+	transition: all .3s;
+	&:hover{opacity: .6;}
+}
+
+input, textarea, select{
+	// 去掉iphone的圓角
+	@screen lg{
+		border-radius: 0;
+	}
+}
+
+input[type='text'], textarea, select{
+	&.error{
+		border-bottom: 1px solid #f00 !important;
+	}
+}
+
+.check-area.error input[type='checkbox']{
+	border: 1px solid #f00 !important;
+}
+
+svg{
+	overflow: visible;
+}
+
+body{
+	// overflow-x: clip;
+	// --- lock ---
+	--lock: 0px;
+	&.is-lock{
+		overflow-y: hidden;
+		margin-right: var(--lock);
+		@screen md{
+			margin-right: 0;
+		}
+		@screen md{
+			overflow: hidden;
+		}
+	}
+}
+
+
+:root{
+	// --cmsLinkColor: theme('colors.brown.DEFAULT');
+}
+
+.container{
+	max-width: 900px;
+}

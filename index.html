@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<title>1440×1920 展示（螢幕 2+3）</title>
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden}
+  img.bg{position:absolute;inset:0;width:100vw;height:100vh;object-fit:cover;display:block;z-index:0}
+  #info{position:fixed;top:8px;right:12px;z-index:20;padding:6px 10px;border-radius:6px;
+        background:rgba(0,0,0,.55);color:#fff;font:14px/1.2 ui-monospace,Consolas,monospace}
+  #clock{position:fixed;left:16px;top:16px;z-index:20;font:700 42px/1 ui-monospace,Consolas,monospace;
+         color:#94dca6;text-shadow:0 1px 2px rgba(0,0,0,.5);user-select:none;pointer-events:none}
+  @media (max-height:1000px){#clock{font-size:32px}}
+</style>
+</head>
+<body>
+  <div id="info">寬：-- px</div>
+  <div id="clock">--:--:--</div>
+
+  <!-- 你的 1440×1920 圖 -->
+  <img class="bg" src="1440.jpg" alt="" draggable="false">
+
+  <script>
+    function showSize(){
+      const w = Math.round(window.innerWidth);
+      const h = Math.round(window.innerHeight);
+      const dpr = (window.devicePixelRatio||1).toFixed(2);
+      document.getElementById('info').textContent = `寬：${w} px　高：${h} px（DPR：${dpr}）`;
+    }
+    const pad = n => n<10 ? '0'+n : ''+n;
+    function tick(){
+      const t = new Date();
+      document.getElementById('clock').textContent =
+        `${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}`;
+    }
+    showSize(); tick();
+    addEventListener('resize', showSize);
+    setInterval(tick, 250);
+  </script>
+</body>
+</html>

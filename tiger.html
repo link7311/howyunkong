@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>好運控</title>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+
+  <link rel="shortcut icon" href="images/fav.png" type="image/x-icon">
+  <link rel="apple-touch-icon" href="images/fav.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="images/fav.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="images/fav.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="images/fav.png">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+
+  <link rel="stylesheet" href="stylesheets/style.css?t=1559">
+  <style>
+  html,body{margin:0;height:100%;background:#fff;overflow:hidden}
+  img.bg{position:absolute;inset:0;width:100vw;height:100vh;object-fit:cover;display:block;z-index:0}
+  #info{position:fixed;top:8px;right:12px;z-index:20;padding:6px 10px;border-radius:6px;
+        background:rgba(0,0,0,.55);color:#fff;font:14px/1.2 ui-monospace,Consolas,monospace}
+  #clock{position:fixed;left:16px;top:16px;z-index:20;font:700 42px/1 ui-monospace,Consolas,monospace;
+         color:#94dca6;text-shadow:0 1px 2px rgba(0,0,0,.5);user-select:none;pointer-events:none}
+  @media (max-height:1000px){#clock{font-size:32px}}
+  .border{ border-width:0; }
+  .border-\[5px\] { border-width:0; }
+  .tiger { border-width:0 !important; }
+</style>
+</head>
+
+<body class="cursor-pointer">
+  <div id="info">寬：-- px</div>
+  <!-- <div class="flex justify-center my-20">
+    <div id="clickme" class="cursor-pointer text-xl border-2 border-black px-3 transition-all shadow-[4px_4px_0px_#000] hover:shadow-none hover:translate-y-1 hover:translate-x-1">CLICK ME</div>
+  </div> -->
+
+  <div class="flex">
+    <section class="flex border-[5px] border-black divide-x-[5px] divide-black" v-scope="{
+      posts: [
+        {
+          id: 1,
+          pic: `images/item-1.png`,
+          title: `1`,
+        },{
+          id: 2,
+          pic: `images/item-2.png`,
+          title: `2`,
+        },{
+          id: 3,
+          pic: `images/item-3.png`,
+          title: `3`,
+        },{
+          id: 4,
+          pic: `images/item-4.png`,
+          title: `4`,
+        },{
+          id: 5,
+          pic: `images/item-5.png`,
+          title: `5`,
+        },
+      ],
+    }" v-on:vue:mounted="tigerHandler($el)">
+      <!-- 這是一條 -->
+      <div v-for="p,i in 3" class="tiger aspect-[1/4] h-[1920px] overflow-hidden">
+        <ul>
+          <li v-for="p,i in posts" :data-id="p.id" class="h-[640px] flex flex-col items-center justify-center h-1/3 will-change-transform">
+            <div class="p-5 relative h-[77%]">
+              <img :src="p.pic" class="img-contain">
+            </div>
+
+            <div class="font-medium text-[30px] border-2 border-black rounded-full px-3 pb-px">{{p.title}}</div>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </div>
+</body>
+<script>
+    function showSize(){
+      const w = Math.round(window.innerWidth);
+      const h = Math.round(window.innerHeight);
+      const dpr = (window.devicePixelRatio||1).toFixed(2);
+      document.getElementById('info').textContent = `寬：${w} px　高：${h} px（DPR：${dpr}）`;
+    }
+    const pad = n => n<10 ? '0'+n : ''+n;
+    function tick(){
+      const t = new Date();
+      document.getElementById('clock').textContent =
+        `${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}`;
+    }
+    showSize(); tick();
+    addEventListener('resize', showSize);
+    setInterval(tick, 250);
+  </script>
+
+<script src="js/jquery.min.js"></script>
+<script src="js/petite-vue.js" defer init></script>
+<script src="js/gsap.min.js"></script>
+</html>
+
+<script>
+  function tigerHandler(el) {
+    $(".tiger", el).each(function (i, el) {
+      let $ul = $("ul", el)
+      let $li = $("li", el)
+
+      // 隨機排序 li
+      const liArray = $li.toArray(); // 轉為陣列
+      for (let i = liArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1)); // 隨機索引
+        [liArray[i], liArray[j]] = [liArray[j], liArray[i]]; // 交換
+      }
+      // 清空 ul 並重新附加隨機排序的 li
+      $ul.empty().append(liArray);
+
+      $ul.clone().appendTo(el)
+    })
+  }
+
+
+  $(window).on("load", function () {
+    $("body").on("click", function () {
+      // 從1開始
+      let end = ~~gsap.utils.random(1, 6)
+
+      $(".tiger").each(function (i, item) {
+        const h = $("li", item).first().outerHeight(true)
+        const total = $("ul", item).first().children().length
+        const totalHeight = $("ul", item).first().outerHeight(true)
+        const targetIndex = 1
+        const loop = 6
+
+
+        let final
+
+        $("ul", item).first().children().each(function (i, li) {
+          let id = li.dataset.id
+          if (id == end) {
+            final = i
+          }
+        })
+
+        let baseY = - (final - targetIndex) * h
+
+
+        gsap.to($("ul", item), {
+          delay: i * 0.2,
+          duration: 3,
+          y: baseY - loop * totalHeight,
+          modifiers: {
+            y: (y) => {
+              // 將 y 值限制在一個週期內，實現無縫循環
+              return (parseFloat(y) % totalHeight) + "px";
+            }
+          },
+          ease: 'power2.inOut',
+        })
+      })
+    })
+  })
+</script>

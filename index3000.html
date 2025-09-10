@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3040×1920 展示</title>
+  <style>
+    html,body{margin:0;height:100%;background:#000;overflow:hidden}
+    .stage{
+      width:3040px;height:1920px;
+      position:relative;
+    }
+    .stage img{
+      position:absolute;inset:0;
+      width:100%;height:100%;
+      object-fit:cover; /* 滿版鋪滿（必要時裁切） */
+      display:block;
+      -webkit-user-select:none; user-select:none;
+      -webkit-app-region:no-drag;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <!-- 換成你的圖檔名稱 -->
+    <img src="3040.jpg" alt="">
+  </div>
+</body>
+</html>

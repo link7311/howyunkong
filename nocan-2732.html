@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>YOASOBI Webcam</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      overflow: hidden;
+      width: 2732px;
+      height: 480px;
+    }
+    #container {
+      position: relative;
+      width: 2732px;
+      height: 480px;
+      overflow: hidden;
+    }
+    .yoasobi {
+      position: absolute;
+      top: 0;
+      height: 480px;
+    }
+  
+  </style>
+</head>
+<body>
+  <div id="container">
+    
+  </div>
+  <canvas id="captureCanvas" width="2732" height="480" style="display:none;"></canvas>
+
+  <script>
+    const container = document.getElementById('container');
+    const imageWidth = 4387;
+    const spacing = 110;
+    const step = 0.5;
+    const images = [];
+    let hasSpawned = false;
+
+    function createYOASOBI(x) {
+      const img = document.createElement('img');
+      img.src = 'Logo_yoasobi_3.svg';
+      img.className = 'yoasobi';
+      img.style.left = `${x}px`;
+      container.appendChild(img);
+      images.push(img);
+    }
+
+    // 初始圖置中
+    createYOASOBI((2732 - imageWidth) / 2);
+
+    function animate() {
+      for (let i = 0; i < images.length; i++) {
+        const img = images[i];
+        const x = parseFloat(img.style.left) + step;
+        img.style.left = `${x}px`;
+      }
+
+      const first = images[0];
+      const firstLeft = parseFloat(first.style.left);
+
+      // 加新圖（當第一張左邊靠近 109px）
+      if (firstLeft >= 109 && !hasSpawned) {
+        createYOASOBI(firstLeft - imageWidth - spacing);
+        hasSpawned = true;
+      }
+
+      // 移除離開畫面的圖
+      if (firstLeft >= 2732) {
+        container.removeChild(first);
+        images.shift();
+        hasSpawned = false;
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    window.onload = () => {
+      animate();
+    };
+
+   
+  </script>
+</body>
+</html>

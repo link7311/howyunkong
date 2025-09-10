@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>好運控</title>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+
+  <link rel="shortcut icon" href="images/fav.png" type="image/x-icon">
+  <link rel="apple-touch-icon" href="images/fav.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="images/fav.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="images/fav.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="images/fav.png">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+
+  <link rel="stylesheet" href="stylesheets/style.css?t=0033">
+
+</head>
+
+<body class="cursor-pointer" style="background-color: #fff;">
+  <!-- <div class="flex justify-center my-20">
+    <div id="clickme" class="cursor-pointer text-xl border-2 border-black px-3 transition-all shadow-[4px_4px_0px_#000] hover:shadow-none hover:translate-y-1 hover:translate-x-1">CLICK ME</div>
+  </div> -->
+
+  <div class="flex">
+    <section class="flex relative" v-scope="{
+      posts: [
+        {
+          id: 1,
+          pic: `images/item-1.png`,
+          title: `SUPER STAR`,
+        },{
+          id: 2,
+          pic: `images/item-2.png`,
+          title: `KONG`,
+        },{
+          id: 3,
+          pic: `images/item-3.png`,
+          title: `AMULET`,
+        },{
+          id: 4,
+          pic: `images/item-4.png`,
+          title: `FLOWER`,
+        },{
+          id: 5,
+          pic: `images/item-5.png`,
+          title: `BUDDHA`,
+        },{
+          id: 6,
+          pic: `images/item-6.png`,
+          title: `GOLDEN PIG`,
+        },{
+          id: 7,
+          pic: `images/item-7.png`,
+          title: `MOON BLOCKS`,
+        },
+      ],
+    }" v-on:vue:mounted="tigerHandler($el)">
+      <!-- enter -->
+      <div id="enterWrap" class="z-[21] absolute tf flex flex-col items-center">
+        <div id="enter-item" class="grid *:row-start-1 *:col-start-1 w-[420px]">
+          <img src="images/realitem-1.png" class="opacity-0">
+          <img src="images/realitem-2.png" class="opacity-0">
+          <img src="images/realitem-3.png" class="opacity-0">
+        </div>
+
+        <div id="enter-text" class="w-full font-bold text-[70px] flex items-center justify-center gap-[28px] mt-10 opacity-0">
+          <span>祇</span>
+          <span>願</span>
+          <span>開</span>
+          <span>始</span>
+        </div>
+      </div>
+
+      <!-- 這是一條 -->
+      <div v-for="p,i in 3" class="tiger relative aspect-[1/4] h-[1920px] overflow-hidden">
+        <!-- logo -->
+        <img src="images/tiger-logo.svg" class="z-20 absolute tf-x top-[50px]">
+
+        <!-- deco -->
+        <img src="images/tiger-kong.svg" class="absolute tf-x top-[50px] max-w-none">
+
+        <ul class="z-10 relative opacity-0 translate-y-full">
+          <li v-for="p,i in posts" :data-id="p.id" class="h-[640px] flex flex-col items-center justify-center will-change-transform">
+            <div class="px-6 py-12 relative h-[77%]">
+              <img :src="p.pic" class="img-contain">
+            </div>
+
+            <div class="font-bold text-[34px] border-[5px] border-black rounded-full px-5 pb-px">{{p.title}}</div>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </div>
+</body>
+
+<script src="js/jquery.min.js"></script>
+<script src="js/petite-vue.js" defer init></script>
+<script src="js/gsap.min.js"></script>
+</html>
+
+<script>
+  function tigerHandler(el) {
+    $(".tiger", el).each(function (i, el) {
+      let $ul = $("ul", el)
+      let $li = $("li", el)
+
+      // 隨機排序 li
+      const liArray = $li.toArray(); // 轉為陣列
+      for (let i = liArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1)); // 隨機索引
+        [liArray[i], liArray[j]] = [liArray[j], liArray[i]]; // 交換
+      }
+      // 清空 ul 並重新附加隨機排序的 li
+      $ul.empty().append(liArray);
+
+      $ul.clone().appendTo(el)
+    })
+  }
+
+
+  $(window).on("load", function () {
+    // 進場效果
+    let $entertl = gsap.timeline({
+      paused: true,
+    })
+
+    // 隨機enter圖
+    let _n = Math.floor(Math.random() * $('#enter-item img').length)
+    let $img = $('#enter-item img').eq(_n)
+
+
+    $entertl.to($img, {
+      duration: 1.4,
+      opacity: 1,
+    }).to("#enter-text", {
+      duration: 1.4,
+      opacity: 1,
+    }, "<0.8").to("#enterWrap", {
+      duration: 1.4,
+      opacity: 0,
+    }).to(".tiger ul", {
+      duration: 1.6,
+      opacity: 1,
+      y: 0,
+      ease: 'power2.inOut',
+      stagger: {
+        each: 0.11,
+      },
+    }, "<0.3")
+
+
+    function enterHandler() {
+      $entertl.play(0)
+    }
+
+    // 一進頁面模擬
+    gsap.delayedCall(1, () => {
+      enterHandler()
+    });
+
+
+
+
+
+
+
+    // 老虎機效果
+    function jslotHandler() {
+      // 從1開始
+      let end = ~~gsap.utils.random(1, 8)
+
+      $(".tiger").each(function (i, item) {
+        const h = $("li", item).first().outerHeight(true)
+        const total = $("ul", item).first().children().length
+        const totalHeight = $("ul", item).first().outerHeight(true)
+        const targetIndex = 1
+        const loop = 6
+
+
+        let final
+
+        $("ul", item).first().children().each(function (i, li) {
+          let id = li.dataset.id
+          if (id == end) {
+            final = i
+          }
+        })
+
+        let baseY = - (final - targetIndex) * h
+
+
+        gsap.to($("ul", item), {
+          delay: i * 0.2,
+          duration: 3,
+          y: baseY - loop * totalHeight,
+          modifiers: {
+            y: (y) => {
+              // 將 y 值限制在一個週期內，實現無縫循環
+              return (parseFloat(y) % totalHeight) + "px";
+            }
+          },
+          ease: 'power2.inOut',
+        })
+      })
+    }
+
+
+
+
+
+
+    $("body").on("click", function () {
+      jslotHandler()
+    })
+  })
+</script>

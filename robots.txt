@@ -1,0 +1,5 @@
+user-agent: *
+disallow: /
+disallow: /*/_gsdata_
+disallow: /cgi-bin
+disallow: /.well-known

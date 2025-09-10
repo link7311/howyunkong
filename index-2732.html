@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<title>2732×768 展示</title>
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden}
+  img{position:absolute;inset:0;width:100vw;height:100vh;object-fit:cover;display:block}
+  /* 右上角資訊條 */
+  #info{
+    position:fixed; top:8px; right:12px; z-index:10;
+    padding:6px 10px; border-radius:6px;
+    background:rgba(0,0,0,.55); color:#fff; font:14px/1.2 ui-monospace,Consolas,monospace;
+    user-select:none;
+  }
+</style>
+</head>
+<body>
+  <div id="info">寬：-- px</div>
+  <img src="2732.jpg" alt="">
+
+  <script>
+    function showSize(){
+      const w = Math.round(window.innerWidth);
+      // 也顯示裝置縮放比，方便檢查 DPI 影響
+      const dpr = (window.devicePixelRatio || 1).toFixed(2);
+      document.getElementById('info').textContent = `寬：${w} px（DPR：${dpr}）`;
+    }
+    showSize();
+    window.addEventListener('resize', showSize);
+  </script>
+</body>
+</html>
