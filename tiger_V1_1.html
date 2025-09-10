@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>好運控</title>
+  <title>好運控V1.12</title>
 
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
@@ -17,12 +17,39 @@
 
   <link rel="stylesheet" href="stylesheets/style.css?t=0033">
 
+  <style>
+    #uidBadge{
+      position: fixed; 
+      top: 16px; 
+      left: 16px; 
+      z-index: 9999;
+      font-size: 140px;       /* 想更大就再加 */
+      font-weight: 900;
+      color: #ff1a1a;         /* 大紅色 */
+      line-height: 1;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      text-shadow: 0 4px 0 #000, 0 1px 15px rgba(255,0,0,.4);
+      pointer-events: none;   /* 不擋點擊 */
+      user-select: none;
+    }
+    #uidBadge.pulse { animation: bump .25s ease; }
+    @keyframes bump {
+      0% { transform: scale(1); }
+      40%{ transform: scale(1.08); }
+      100%{ transform: scale(1); }
+    }
+  </style>
+
 </head>
 
 <body class="cursor-pointer" style="background-color: #fff;">
   <!-- <div class="flex justify-center my-20">
     <div id="clickme" class="cursor-pointer text-xl border-2 border-black px-3 transition-all shadow-[4px_4px_0px_#000] hover:shadow-none hover:translate-y-1 hover:translate-x-1">CLICK ME</div>
   </div> -->
+
+  <!-- UID 大字樣 -->
+  <div id="uidBadge">—</div>
+  <!-- 你原本的內容從這裡開始 -->
 
   <div class="flex">
     <section class="flex relative" v-scope="{
@@ -158,7 +185,7 @@
 
     // 一進頁面模擬
     gsap.delayedCall(1, () => {
-      enterHandler()
+      //enterHandler()
     });
 
 
@@ -216,4 +243,89 @@
       jslotHandler()
     })
   })
+</script>
+<script>
+  (function(){
+    function getQueryParam(name) {
+      try {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name);
+      } catch { return null; }
+    }
+
+    function resolveWsUrl() {
+      // 可用 ?ws=ws://localhost:3000/ws 覆蓋
+      const override = getQueryParam('ws');
+      if (override) return override;
+
+      // 若本頁是 http(s) 服務，直接同源 /ws
+      if (/^https?:/i.test(location.origin)) {
+        return location.origin.replace(/^http/, 'ws') + '/ws';
+      }
+      // 若是 file://（例如 Electron 本地檔），預設連 localhost:3000
+      return 'ws://localhost:3000/ws';
+    }
+
+    const wsUrl = resolveWsUrl();
+    let ws, retry = 0;
+
+    function setBadge(txt, pulse = true) {
+      const el = document.getElementById('uidBadge');
+      if (!el) return;
+      el.textContent = txt;
+      if (pulse) {
+        el.classList.remove('pulse');
+        void el.offsetWidth;   // 重新觸發動畫
+        el.classList.add('pulse');
+      }
+    }
+
+    function setBadgeOnline(ok) {
+      const el = document.getElementById('uidBadge');
+      if (!el) return;
+      el.style.opacity = ok ? '1' : '0.5';
+    }
+
+    function connect() {
+      try {
+        ws = new WebSocket(wsUrl);
+
+        ws.addEventListener('open', () => {
+          retry = 0;
+          setBadgeOnline(true);
+        });
+
+        ws.addEventListener('message', (ev) => {
+          try {
+            const data = JSON.parse(ev.data);
+            // 兼容 {epcs:[...]}, {epc:""}, {uid:""}
+            let epc = null;
+            if (Array.isArray(data.epcs) && data.epcs.length) epc = data.epcs[0];
+            else if (typeof data.epc === 'string') epc = data.epc;
+            else if (typeof data.uid === 'string') epc = data.uid;
+
+            if (epc) setBadge(epc, true);
+          } catch(_) {}
+        });
+
+        ws.addEventListener('close', () => {
+          setBadgeOnline(false);
+          // 指數回退重連（上限 30s）
+          retry++;
+          const delay = Math.min(30000, 1000 * Math.pow(2, retry - 1));
+          setTimeout(connect, delay);
+        });
+
+        ws.addEventListener('error', () => {
+          setBadgeOnline(false);
+          // 交給 close 觸發重連
+        });
+      } catch(_) {
+        setTimeout(connect, 2000);
+      }
+    }
+
+    // 啟動
+    window.addEventListener('load', connect);
+  })();
 </script>
