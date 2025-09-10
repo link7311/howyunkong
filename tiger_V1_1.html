@@ -16,73 +16,19 @@
   <meta name="description" content="">
 
   <link rel="stylesheet" href="stylesheets/style.css?t=0033">
-
-  <style>
-    #uidBadge{
-      position: fixed; 
-      top: 16px; 
-      left: 16px; 
-      z-index: 9999;
-      font-size: 80px;       /* 想更大就再加 */
-      font-weight: 900;
-      color: #ff1a1a;         /* 大紅色 */
-      line-height: 1;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-      text-shadow: 0 4px 0 #000, 0 1px 15px rgba(255,0,0,.4);
-      pointer-events: none;   /* 不擋點擊 */
-      user-select: none;
-    }
-    #uidBadge.pulse { animation: bump .25s ease; }
-    @keyframes bump {
-      0% { transform: scale(1); }
-      40%{ transform: scale(1.08); }
-      100%{ transform: scale(1); }
-    }
-  </style>
-
 </head>
 
 <body class="cursor-pointer" style="background-color: #fff;">
-  <!-- <div class="flex justify-center my-20">
-    <div id="clickme" class="cursor-pointer text-xl border-2 border-black px-3 transition-all shadow-[4px_4px_0px_#000] hover:shadow-none hover:translate-y-1 hover:translate-x-1">CLICK ME</div>
-  </div> -->
-
-  <!-- UID 大字樣 -->
-  <div id="uidBadge">—</div>
-  <!-- 你原本的內容從這裡開始 -->
-
   <div class="flex">
     <section class="flex relative" v-scope="{
       posts: [
-        {
-          id: 1,
-          pic: `images/item-1.png`,
-          title: `SUPER STAR`,
-        },{
-          id: 2,
-          pic: `images/item-2.png`,
-          title: `KONG`,
-        },{
-          id: 3,
-          pic: `images/item-3.png`,
-          title: `AMULET`,
-        },{
-          id: 4,
-          pic: `images/item-4.png`,
-          title: `FLOWER`,
-        },{
-          id: 5,
-          pic: `images/item-5.png`,
-          title: `BUDDHA`,
-        },{
-          id: 6,
-          pic: `images/item-6.png`,
-          title: `GOLDEN PIG`,
-        },{
-          id: 7,
-          pic: `images/item-7.png`,
-          title: `MOON BLOCKS`,
-        },
+        { id: 1, pic: `images/item-1.png`, title: `SUPER STAR` },
+        { id: 2, pic: `images/item-2.png`, title: `KONG` },
+        { id: 3, pic: `images/item-3.png`, title: `AMULET` },
+        { id: 4, pic: `images/item-4.png`, title: `FLOWER` },
+        { id: 5, pic: `images/item-5.png`, title: `BUDDHA` },
+        { id: 6, pic: `images/item-6.png`, title: `GOLDEN PIG` },
+        { id: 7, pic: `images/item-7.png`, title: `MOON BLOCKS` },
       ],
     }" v-on:vue:mounted="tigerHandler($el)">
       <!-- enter -->
@@ -114,7 +60,6 @@
             <div class="px-6 py-12 relative h-[77%]">
               <img :src="p.pic" class="img-contain">
             </div>
-
             <div class="font-bold text-[34px] border-[5px] border-black rounded-full px-5 pb-px">{{p.title}}</div>
           </li>
         </ul>
@@ -129,208 +74,146 @@
 </html>
 
 <script>
+  // === 初始化每欄：洗牌 + 複製一份 ul 供無縫輪播 ===
   function tigerHandler(el) {
     $(".tiger", el).each(function (i, el) {
-      let $ul = $("ul", el)
-      let $li = $("li", el)
+      let $ul = $("ul", el);
+      let $li = $("li", el);
 
       // 隨機排序 li
-      const liArray = $li.toArray(); // 轉為陣列
+      const liArray = $li.toArray();
       for (let i = liArray.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1)); // 隨機索引
-        [liArray[i], liArray[j]] = [liArray[j], liArray[i]]; // 交換
+        const j = Math.floor(Math.random() * (i + 1));
+        [liArray[i], liArray[j]] = [liArray[j], liArray[i]];
       }
-      // 清空 ul 並重新附加隨機排序的 li
       $ul.empty().append(liArray);
 
-      $ul.clone().appendTo(el)
-    })
+      $ul.clone().appendTo(el);
+    });
   }
 
+  // === 依 UID 尾 5 碼選圖（回傳索引 0,1,2）===
+  function pickEnterIndexByUID(uid) {
+    const MAP = {
+      "568EA": 0, // realitem-1.png
+      "578EA": 1, // realitem-2.png
+      "57CEA": 2  // realitem-3.png
+    };
+    const tail5 = String(uid || '').slice(-5).toUpperCase();
+    return (tail5 in MAP) ? MAP[tail5] : 0; // 找不到預設 0
+  }
+
+  // === 收到 UID 後：依映射顯示對應進場圖並播放動畫 ===
+  function handleUID(uid) {
+    const idx = pickEnterIndexByUID(uid);
+    const $imgs = $('#enter-item img').css('opacity', 0);
+    const $img = $imgs.eq(idx);
+
+    const tl = gsap.timeline({ paused: true });
+    tl.to($img, { duration: 1.4, opacity: 1 })
+      .to("#enter-text", { duration: 1.4, opacity: 1 }, "<0.8")
+      .to("#enterWrap", { duration: 1.4, opacity: 0 })
+      .to(".tiger ul", {
+        duration: 1.6,
+        opacity: 1,
+        y: 0,
+        ease: 'power2.inOut',
+        stagger: { each: 0.11 },
+      }, "<0.3")
+      .play(0);
+  }
 
   $(window).on("load", function () {
-    // 進場效果
-    let $entertl = gsap.timeline({
-      paused: true,
-    })
+    // （不再自動進場，等收到 UID 才觸發）
 
-    // 隨機enter圖
-    let _n = Math.floor(Math.random() * $('#enter-item img').length)
-    let $img = $('#enter-item img').eq(_n)
-
-
-    $entertl.to($img, {
-      duration: 1.4,
-      opacity: 1,
-    }).to("#enter-text", {
-      duration: 1.4,
-      opacity: 1,
-    }, "<0.8").to("#enterWrap", {
-      duration: 1.4,
-      opacity: 0,
-    }).to(".tiger ul", {
-      duration: 1.6,
-      opacity: 1,
-      y: 0,
-      ease: 'power2.inOut',
-      stagger: {
-        each: 0.11,
-      },
-    }, "<0.3")
-
-
-    function enterHandler() {
-      $entertl.play(0)
-    }
-
-    // 一進頁面模擬
-    gsap.delayedCall(1, () => {
-      //enterHandler()
-    });
-
-
-
-
-
-
-
-    // 老虎機效果
+    // 老虎機效果（維持原樣，但修正亂數範圍 1..7）
     function jslotHandler() {
-      // 從1開始
-      let end = ~~gsap.utils.random(1, 8)
+      let end = Math.floor(Math.random() * 7) + 1; // 1..7
 
       $(".tiger").each(function (i, item) {
-        const h = $("li", item).first().outerHeight(true)
-        const total = $("ul", item).first().children().length
-        const totalHeight = $("ul", item).first().outerHeight(true)
-        const targetIndex = 1
-        const loop = 6
+        const h = $("li", item).first().outerHeight(true);
+        const total = $("ul", item).first().children().length;
+        const totalHeight = $("ul", item).first().outerHeight(true);
+        const targetIndex = 1;
+        const loop = 6;
 
-
-        let final
-
+        let final = 0;
         $("ul", item).first().children().each(function (i, li) {
-          let id = li.dataset.id
-          if (id == end) {
-            final = i
-          }
-        })
+          let id = li.dataset.id;
+          if (id == end) final = i;
+        });
 
-        let baseY = - (final - targetIndex) * h
-
+        let baseY = - (final - targetIndex) * h;
 
         gsap.to($("ul", item), {
           delay: i * 0.2,
           duration: 3,
           y: baseY - loop * totalHeight,
           modifiers: {
-            y: (y) => {
-              // 將 y 值限制在一個週期內，實現無縫循環
-              return (parseFloat(y) % totalHeight) + "px";
-            }
+            y: (y) => (parseFloat(y) % totalHeight) + "px"
           },
           ease: 'power2.inOut',
-        })
-      })
+        });
+      });
     }
 
-
-
-
-
-
     $("body").on("click", function () {
-      jslotHandler()
-    })
-  })
+      jslotHandler();
+    });
+  });
 </script>
+
 <script>
+  // === WebSocket：連上 rfid_ws_server.js，收到 UID 就觸發 handleUID ===
   (function(){
     function getQueryParam(name) {
-      try {
-        const url = new URL(window.location.href);
-        return url.searchParams.get(name);
-      } catch { return null; }
+      try { return new URL(window.location.href).searchParams.get(name); }
+      catch { return null; }
     }
 
     function resolveWsUrl() {
-      // 可用 ?ws=ws://localhost:3000/ws 覆蓋
-      const override = getQueryParam('ws');
+      const override = getQueryParam('ws');       // 可用 ?ws=ws://host:3000/ws 覆蓋
       if (override) return override;
-
-      // 若本頁是 http(s) 服務，直接同源 /ws
       if (/^https?:/i.test(location.origin)) {
         return location.origin.replace(/^http/, 'ws') + '/ws';
       }
-      // 若是 file://（例如 Electron 本地檔），預設連 localhost:3000
-      return 'ws://localhost:3000/ws';
+      return 'ws://localhost:3000/ws';            // file:// 情境的預設
     }
 
     const wsUrl = resolveWsUrl();
     let ws, retry = 0;
 
-    function setBadge(txt, pulse = true) {
-      const el = document.getElementById('uidBadge');
-      if (!el) return;
-      el.textContent = txt;
-      if (pulse) {
-        el.classList.remove('pulse');
-        void el.offsetWidth;   // 重新觸發動畫
-        el.classList.add('pulse');
-      }
-    }
-
-    function setBadgeOnline(ok) {
-      const el = document.getElementById('uidBadge');
-      if (!el) return;
-      el.style.opacity = ok ? '1' : '0.5';
-    }
-
     function connect() {
       try {
         ws = new WebSocket(wsUrl);
 
-        ws.addEventListener('open', () => {
-          retry = 0;
-          setBadgeOnline(true);
-        });
+        ws.addEventListener('open', () => { retry = 0; });
 
         ws.addEventListener('message', (ev) => {
           try {
             const data = JSON.parse(ev.data);
             // 兼容 {epcs:[...]}, {epc:""}, {uid:""}
-            let epc = null;
-            if (Array.isArray(data.epcs) && data.epcs.length) epc = data.epcs[0];
-            else if (typeof data.epc === 'string') epc = data.epc;
-            else if (typeof data.uid === 'string') epc = data.uid;
+            let uid = null;
+            if (Array.isArray(data.epcs) && data.epcs.length) uid = data.epcs[0];
+            else if (typeof data.epc === 'string') uid = data.epc;
+            else if (typeof data.uid === 'string') uid = data.uid;
 
-            //if (epc) setBadge(epc, true);  //UID全碼
-            if (epc) {
-              const short = epc.slice(-5);   // UID取最後 5 碼
-              setBadge(short, true);
-            }
-
+            if (uid) handleUID(uid);
           } catch(_) {}
         });
 
         ws.addEventListener('close', () => {
-          setBadgeOnline(false);
-          // 指數回退重連（上限 30s）
           retry++;
           const delay = Math.min(30000, 1000 * Math.pow(2, retry - 1));
           setTimeout(connect, delay);
         });
 
-        ws.addEventListener('error', () => {
-          setBadgeOnline(false);
-          // 交給 close 觸發重連
-        });
+        ws.addEventListener('error', () => { /* 交給 close 重連 */ });
       } catch(_) {
         setTimeout(connect, 2000);
       }
     }
 
-    // 啟動
     window.addEventListener('load', connect);
   })();
 </script>
