@@ -6,6 +6,9 @@ const DESIRED_HEIGHT = 1920;
 
 app.commandLine.appendSwitch('high-dpi-support', '1');
 app.commandLine.appendSwitch('force-device-scale-factor', '1');
+app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
+webPreferences: { zoomFactor: 1.0, backgroundThrottling: false }
+
 
 // === 單例鎖，避免開多個實例 ===
 if (!app.requestSingleInstanceLock()) {
