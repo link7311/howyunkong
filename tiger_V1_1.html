@@ -304,7 +304,12 @@
             else if (typeof data.epc === 'string') epc = data.epc;
             else if (typeof data.uid === 'string') epc = data.uid;
 
-            if (epc) setBadge(epc, true);
+            //if (epc) setBadge(epc, true);  //UID全碼
+            if (epc) {
+              const short = epc.slice(-5);   // UID取最後 5 碼
+              setBadge(short, true);
+            }
+
           } catch(_) {}
         });
 
