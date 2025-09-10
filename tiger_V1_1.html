@@ -104,7 +104,13 @@
   }
 
   // === 收到 UID 後：依映射顯示對應進場圖並播放動畫 ===
+
+  let entered = false; // 是否已經進場
+
   function handleUID(uid) {
+    if (entered) return;   // 已進場就直接忽略
+    entered = true;        // 標記已進場
+
     const idx = pickEnterIndexByUID(uid);
     const $imgs = $('#enter-item img').css('opacity', 0);
     const $img = $imgs.eq(idx);
@@ -122,6 +128,7 @@
       }, "<0.3")
       .play(0);
   }
+
 
   $(window).on("load", function () {
     // （不再自動進場，等收到 UID 才觸發）
